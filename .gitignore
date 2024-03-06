@@ -1,0 +1,14 @@
+# Byte-compiled Python files
+*.pyc
+
+# Compiled Python modules
+__pycache__/
+
+# Python egg metadata
+*.egg-info/
+
+# Virtual environment
+venv/
+
+# Environment configuration
+.env
