@@ -1,6 +1,7 @@
 from confluent_kafka.admin import AdminClient, NewTopic
 from dotenv import load_dotenv
 import os
+import json
 
 
 load_dotenv()
@@ -12,7 +13,7 @@ admin_client = AdminClient(
     {'bootstrap.servers': primary_kafka_bootstrap_server})
 
 
-def create_topic(topic_name = "test", num_partitions = 1, replication_factor = 1):
+def create_topic(topic_name="test", num_partitions=1, replication_factor=1):
     print("Create a new topic.", topic_name)
 
     topic = NewTopic(topic_name, num_partitions, replication_factor)
@@ -27,5 +28,11 @@ def create_topic(topic_name = "test", num_partitions = 1, replication_factor = 1
 
     print("Terminating Admin Client")
 
+
 if __name__ == "__main__":
-    create_topic("test", 1, 1)
+    with open('./primary-kafka-cluster-configuration.json', 'r') as file:
+        data = json.load(file)
+
+    for topics in data:
+        # print(topics, data[topics]["num_partitions"],data[topics]["replication_factor"])
+        create_topic(topics, data[topics]["num_partitions"], data[topics]["replication_factor"])

@@ -1,6 +1,7 @@
 from confluent_kafka import Consumer, KafkaError
 from dotenv import load_dotenv
 import os
+import json
 
 
 load_dotenv()
@@ -9,8 +10,8 @@ primary_kafka_bootstrap_server = f"{os.getenv('PRIMARY_KAFKA_SERVER_IP')}:{
     os.getenv('PRIMARY_KAFKA_SERVER_PORT')}"
 
 
-def consume_messages(topic_name = "test", group_id = "group-a"):
-    print(f"Consumer From Group {group_id} and subscribed for topic {topic_name}")
+def consume_messages(topics = ["test"], group_id = "group-a"):
+    print(f"Consumer From Group {group_id} and subscribed for topic {topics}")
 
     consumer_config = {
         'bootstrap.servers': primary_kafka_bootstrap_server,
@@ -20,7 +21,7 @@ def consume_messages(topic_name = "test", group_id = "group-a"):
 
     consumer = Consumer(consumer_config)
 
-    consumer.subscribe([topic_name])
+    consumer.subscribe(topics)
 
     try:
         while True:
@@ -36,10 +37,13 @@ def consume_messages(topic_name = "test", group_id = "group-a"):
                     print(f'Consumer error: {msg.error()}')
                     break
 
-            print(f"Received message: {msg.value().decode('utf-8')}")
+            print(f"Received message: {msg.value().decode(
+                'utf-8')} from topic: {msg.topic()} partition: {msg.partition()} ")
 
     except KeyboardInterrupt:
         consumer.close()
 
 if __name__ == "__main__":
-    consume_messages()
+    with open('./primary-kafka-cluster-configuration.json', 'r') as file:
+        data = json.load(file)
+    consume_messages(topics=list(data))
