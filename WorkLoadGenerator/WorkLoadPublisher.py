@@ -41,7 +41,9 @@ if __name__ == "__main__":
         message["message_data"] = message_data
 
         if random_topic in ["topic_c", "topic_d"]:
-            message["message_destination"] = random.randrange(2)
+            message["message_destination"] = random.choice(
+                ["topic_c", "topic_d"])
+            message["priority"] = random.randrange(2)
 
         message = json.dumps(message)
 

@@ -1,0 +1,10 @@
+{
+    "topic_c":{
+        "num_partitions": 2,
+        "replication_factor": 1
+    },
+    "topic_d":{
+        "num_partitions": 2,
+        "replication_factor": 1
+    }
+}

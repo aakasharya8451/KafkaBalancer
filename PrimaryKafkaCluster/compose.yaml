@@ -1,13 +1,13 @@
 version: '3'
 
 services:
-  zookeeper:
+  zookeeper-primary:
     image: zookeeper:latest
-    container_name: zookeeper
+    container_name: zookeeper-primary
     ports:
       - "2181:2181"
 
-  kafka:
+  rimary_kafka_cluster:
     image: confluentinc/cp-kafka:latest
     container_name: primary_kafka_cluster
     ports:
@@ -18,4 +18,4 @@ services:
       KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://${PRIVATE_IP}:9092"
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     depends_on:
-      - zookeeper
+      - zookeeper-primary

@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+  zookeeper-intermediate:
+    image: zookeeper:latest
+    container_name: zookeeper-intermediate
+    ports:
+      - "2182:2181"
+
+  rimary_kafka_cluster:
+    image: confluentinc/cp-kafka:latest
+    container_name: intermediate_kafka_cluster
+    ports:
+      - "9093:9093"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: "${PRIVATE_IP}:2182"
+      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://${PRIVATE_IP}:9093"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    depends_on:
+      - zookeeper-intermediate
