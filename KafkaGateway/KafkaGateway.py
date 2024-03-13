@@ -40,13 +40,12 @@ def consume_messages(topics=["test"], group_id="group-a"):
                 else:
                     print(f'Consumer error: {msg.error()}')
                     break
-
-            # print(f"Received message: {msg.value().decode(
-            #     'utf-8')} from topic: {msg.topic()} partition: {msg.partition()} ")
-            message_timestamp = msg.timestamp()[1] / 1000.0
-            if message_timestamp > join_time:
-                route(f"Received message: {msg.value().decode(
-                    'utf-8')} from topic: {msg.topic()} partition: {msg.partition()} ")
+            try:
+                message_timestamp = msg.timestamp()[1] / 1000.0
+                if message_timestamp > join_time:
+                    route(msg.value().decode('utf-8'), msg.topic())
+            except Exception as e:
+                print("Error occurred while processing or publishing message to the intermediate kafka cluster:", e)
 
     except KeyboardInterrupt:
         consumer.close()

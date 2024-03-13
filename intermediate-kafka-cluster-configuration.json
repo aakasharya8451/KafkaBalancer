@@ -1,9 +1,9 @@
 {
-    "topic_c":{
+    "topic_x":{
         "num_partitions": 2,
         "replication_factor": 1
     },
-    "topic_d":{
+    "topic_y":{
         "num_partitions": 2,
         "replication_factor": 1
     }
