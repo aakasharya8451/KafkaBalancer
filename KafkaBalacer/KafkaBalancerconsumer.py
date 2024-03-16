@@ -1,6 +1,10 @@
-from confluent_kafka import Consumer, KafkaError
+from confluent_kafka import Consumer, KafkaException, KafkaError, Producer
+import threading
+import random
 from dotenv import load_dotenv
 import os
+import requests
+import time
 
 
 load_dotenv()
@@ -8,39 +12,76 @@ load_dotenv()
 intermediate_kafka_bootstrap_server = f"{os.getenv('INTERMEDIATE_KAFKA_SERVER_IP')}:{
     os.getenv('INTERMEDIATE_KAFKA_SERVER_PORT')}"
 
+dummy_servers = [
+    f"http://{os.getenv("PRIVATE_IP")}:5000/", f"http://{os.getenv("PRIVATE_IP")}:5001/"]
+kafka_topics = ["topic_x", "topic_y"]
 
-def consume_messages(topics=["test"], group_id="group-a"):
-    print(f"Consumer From Group {group_id} and subscribed for topic {topics}")
+connection_counts = {server: 0 for server in dummy_servers}
 
-    consumer_config = {
-        'bootstrap.servers': intermediate_kafka_bootstrap_server,
-        'group.id': group_id,
-        'auto.offset.reset': 'end'
-    }
+consumer_config = {
+    'bootstrap.servers': intermediate_kafka_bootstrap_server,
+    'group.id': 'my_consumer_group',
+    'auto.offset.reset': 'latest',
+    'enable.auto.commit': False
+}
 
-    consumer = Consumer(consumer_config)
+consumer = Consumer(consumer_config)
 
-    consumer.subscribe(topics)
 
+def consume_and_balance():
+    join_time = time.time()
     try:
+        consumer.subscribe(kafka_topics)
+
         while True:
-            msg = consumer.poll(timeout=-1)  # -1 for real-time
+            msg = consumer.poll(timeout=-1)
 
             if msg is None:
                 continue
-
             if msg.error():
                 if msg.error().code() == KafkaError._PARTITION_EOF:
                     continue
                 else:
-                    print(f'Consumer error: {msg.error()}')
-                    break
+                    raise KafkaException(msg.error())
+                
+            message_timestamp = msg.timestamp()[1] / 1000.0
+            if message_timestamp > join_time:
+                # Choose server with least connections
+                chosen_server = min(connection_counts, key=connection_counts.get)
+                # print(f"Message: {msg.value().decode(
+                #     'utf-8')} sent to {chosen_server}")
 
-            print(f"Received message: {msg.value().decode('utf-8')}")
+                # Send message to chosen server
+                requests.post(chosen_server, data=msg.value())
+                # response = requests.post(chosen_server, data=msg.value())
+                # print("Response from dummy server:", response.text)
 
-    except KeyboardInterrupt:
-        consumer.close()
+                # Simulate message processing time
+                processing_time = random.randint(1, 5)
+                # Increase connection count for chosen server
+                connection_counts[chosen_server] += 1
+                print(connection_counts)
+                # Simulate message processing time
+                threading.Timer(processing_time, decrease_connection_count, args=[
+                                chosen_server]).start()
+
+    except KafkaException as e:
+        print(f"KafkaException: {e}")
 
 
-if __name__ == "__main__":
-    consume_messages(["topic_x", "topic_y"])
+def decrease_connection_count(server):
+    print(f"Number of requests processed by {
+          server}: {connection_counts[server]}")
+    connection_counts[server] -= 1
+
+
+# Start consumer thread
+consumer_thread = threading.Thread(target=consume_and_balance)
+consumer_thread.daemon = True
+consumer_thread.start()
+
+# Keep the main thread running
+while True:
+    pass
+
+

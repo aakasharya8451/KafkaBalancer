@@ -50,4 +50,4 @@ if __name__ == "__main__":
         print(random_topic, message, partition)
         publish_load(random_topic, message, partition)
 
-        time.sleep(60/60)
+        time.sleep(10/60)
