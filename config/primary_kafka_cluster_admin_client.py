@@ -30,7 +30,7 @@ def create_topic(topic_name="test", num_partitions=1, replication_factor=1):
 
 
 if __name__ == "__main__":
-    create_topic()
+    # create_topic()
     with open(r'config\config_json\primary-kafka-cluster-configuration.json', 'r') as file:
         data = json.load(file)
 

@@ -96,5 +96,4 @@ class LoadBalancer:
 
 if __name__ == "__main__":
     load_balancer = LoadBalancer(topics = ["topic_x", "topic_y"], server_port_list= [5000, 5001])
-    load_balancer.setup_consumer_producer()
     load_balancer.run()
