@@ -3,9 +3,7 @@ from confluent_kafka import Consumer, KafkaError, Producer
 from dotenv import load_dotenv
 import time
 import threading
-from routing_logic import route # calling from inside the script
-# from src.gateway.routing_logic import route # Use only when calling from outside the module
-
+import json
 
 load_dotenv()
 
@@ -68,7 +66,7 @@ class Gateway:
                 try:
                     message_timestamp = msg.timestamp()[1] / 1000.0
                     if message_timestamp > join_time:
-                        topic_name, message, partition = route(
+                        topic_name, message, partition = self.__route(
                             msg.value().decode('utf-8'), msg.topic())
                         print(topic_name, message, partition)
                         self.producer.produce(topic_name, message.encode(
@@ -81,6 +79,23 @@ class Gateway:
 
         except KeyboardInterrupt:
             self.consumer.close()
+
+
+    def __route(self, message, topic):
+        print(message, topic)
+        message_decoded = json.loads(message)
+
+        if message_decoded["message_destination"] == "topic_x":
+            if message_decoded["priority"] == 0:
+                return (message_decoded["message_destination"], message, message_decoded["priority"])
+            elif message_decoded["priority"] == 1:
+                return (message_decoded["message_destination"], message, message_decoded["priority"])
+        elif message_decoded["message_destination"] == "topic_y":
+            if message_decoded["priority"] == 0:
+                return (message_decoded["message_destination"], message, message_decoded["priority"])
+            elif message_decoded["priority"] == 1:
+                return (message_decoded["message_destination"], message, message_decoded["priority"])
+
 
     def run(self):
         try:

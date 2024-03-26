@@ -11,15 +11,20 @@ load_dotenv()
 intermediate_kafka_bootstrap_server = f"{os.getenv('INTERMEDIATE_KAFKA_SERVER_IP')}:{
     os.getenv('INTERMEDIATE_KAFKA_SERVER_PORT')}"
 
-dummy_servers = [
-    f"http://{os.getenv('PRIVATE_IP')}:5000/", f"http://{os.getenv('PRIVATE_IP')}:5001/"]
-
 
 class LoadBalancer:
-    def __init__(self, topics=["test"], group_id="my_consumer_group"):
+    def __init__(self, topics=["test"], group_id="my_consumer_group", server_port_list =[5000]):
         self.topics = topics
         self.group_id = group_id
-        self.connection_counts = {server: 0 for server in dummy_servers}
+        self.server_port_list = server_port_list
+        self.server_list = self.get_server_list()
+        self.connection_counts = {server: 0 for server in self.server_list}
+
+    def get_server_list(self):
+        server_list = []
+        for port in self.server_port_list:
+            server_list.append(f"http://{os.getenv('PRIVATE_IP')}:{port}")
+        return server_list
 
     def setup_consumer_producer(self):
         try:
@@ -90,6 +95,6 @@ class LoadBalancer:
 
 
 if __name__ == "__main__":
-    load_balancer = LoadBalancer(["topic_x", "topic_y"])
+    load_balancer = LoadBalancer(topics = ["topic_x", "topic_y"], server_port_list= [5000, 5001])
     load_balancer.setup_consumer_producer()
     load_balancer.run()
