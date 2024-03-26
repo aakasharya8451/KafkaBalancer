@@ -6,11 +6,11 @@ import json
 
 load_dotenv()
 
-intermediate_kafka_bootstrap_server = f"{os.getenv('INTERMEDIATE_KAFKA_SERVER_IP')}:{
-    os.getenv('INTERMEDIATE_KAFKA_SERVER_PORT')}"
+primary_kafka_bootstrap_server = f"{os.getenv('PRIMARY_KAFKA_SERVER_IP')}:{
+    os.getenv('PRIMARY_KAFKA_SERVER_PORT')}"
 
 admin_client = AdminClient(
-    {'bootstrap.servers': intermediate_kafka_bootstrap_server})
+    {'bootstrap.servers': primary_kafka_bootstrap_server})
 
 
 def create_topic(topic_name="test", num_partitions=1, replication_factor=1):
@@ -30,11 +30,10 @@ def create_topic(topic_name="test", num_partitions=1, replication_factor=1):
 
 
 if __name__ == "__main__":
-    with open('./intermediate-kafka-cluster-configuration.json', 'r') as file:
+    create_topic()
+    with open(r'config\config_json\primary-kafka-cluster-configuration.json', 'r') as file:
         data = json.load(file)
 
     for topics in data:
         # print(topics, data[topics]["num_partitions"],data[topics]["replication_factor"])
-        create_topic(topics, data[topics]["num_partitions"],
-                     data[topics]["replication_factor"])
-
+        create_topic(topics, data[topics]["num_partitions"], data[topics]["replication_factor"])

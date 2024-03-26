@@ -2,7 +2,7 @@ from confluent_kafka import Consumer, KafkaError, Producer
 from dotenv import load_dotenv
 import os
 import time
-from KafkaGatewayRoutLogic import route
+from src.gateway.routing_logic import route
 
 
 load_dotenv()

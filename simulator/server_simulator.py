@@ -1,6 +1,7 @@
 from flask import Flask, request
 from dotenv import load_dotenv
 import os
+import sys
 
 
 load_dotenv()
@@ -15,8 +16,18 @@ def dummy_server():
         print("Received request:", data)
         return "Request received by dummy server\n"
     else:
-        return "Welcome to the dummy server 2\n"
+        return "Welcome to the dummy server 1\n"
 
 
 if __name__ == '__main__':
-    app.run(host=os.getenv("PRIVATE_IP"), port=5001)
+    if len(sys.argv) != 3:
+        print(
+            "Usage: python server_simulator.py <server_name> <port>")
+        sys.exit(1)
+
+    host = os.getenv("PRIVATE_IP")
+    port = int(sys.argv[2])
+
+    print(f"Server {sys.argv[1]} is initiated and running on {host}:{port}")
+
+    app.run(host = host, port=port)

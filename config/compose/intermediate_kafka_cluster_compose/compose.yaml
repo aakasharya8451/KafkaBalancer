@@ -7,7 +7,7 @@ services:
     ports:
       - "2182:2181"
 
-  rimary_kafka_cluster:
+  intermediate_kafka_cluster:
     image: confluentinc/cp-kafka:latest
     container_name: intermediate_kafka_cluster
     ports:

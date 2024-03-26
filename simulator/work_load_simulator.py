@@ -1,11 +1,16 @@
-from confluent_kafka import Producer
-from WorkLoadGenerator import generate_work, generate_user_id
-from dotenv import load_dotenv
+import sys
 import os
+
+# Add the project root directory to the Python path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from confluent_kafka import Producer
+from dotenv import load_dotenv
 import time
 import datetime
 import json
 import random
+from utils.message_uid import generate_message, generate_user_id
 
 
 load_dotenv()
@@ -22,7 +27,7 @@ def publish_load(topic_name="test", message="Dummy Message From WorkLoad Generat
 
 
 if __name__ == "__main__":
-    with open('./primary-kafka-cluster-configuration.json', 'r') as file:
+    with open(r'config\config_json\primary-kafka-cluster-configuration.json', 'r') as file:
         data = json.load(file)
         # print(data)
         # print(list(data))
@@ -36,7 +41,7 @@ if __name__ == "__main__":
         partition = random.randrange(data[random_topic]["num_partitions"])
 
         # print("Message", datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-        message_data = f"{generate_work()} {datetime.datetime.now().strftime(
+        message_data = f"{generate_message()} {datetime.datetime.now().strftime(
             "%Y-%m-%d %H:%M:%S")}"
         message["message_data"] = message_data
 
